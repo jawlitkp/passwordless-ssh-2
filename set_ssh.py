@@ -197,12 +197,13 @@ def main():
 
     key = open(os.path.expanduser('~/.ssh/id_rsa.pub')).read()
     logger.info("Setting policy...")
-    #if not set_key_policy(key, args.host, logger, args.username, args.password, args.port):
-    #    logger.error("Paramiko failed to set ssh connection will try other methods...")
-    set_ssh_pexpect(args.host, logger, args.username, args.password, args.port, args.timeout)
-    logger.info("Connection is set via pexpect (due to paramiko bug). Exiting...")
-    sys.exit(0)
-    #logger.info("RSA key policy is set for %s. Testing connection..." % args.host)
+    # If paramiko fails for some reason we couldn't handle, do failback to pexpect
+    if not set_key_policy(key, args.host, logger, args.username, args.password, args.port):
+    	logger.error("Paramiko failed to set ssh connection will try other methods...")
+    	set_ssh_pexpect(args.host, logger, args.username, args.password, args.port, args.timeout)
+    	logger.info("Connection is set via pexpect (due to paramiko bug). Exiting...")
+    	sys.exit(0)
+    logger.info("RSA key policy is set for %s. Testing connection..." % args.host)
 
     if not is_hostname(args.host):  # checking if hostname or IP is given
         if is_ipv4(args.host):  # checking if it is valid IPV4 address
