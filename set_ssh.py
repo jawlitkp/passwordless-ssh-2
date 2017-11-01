@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 '''
 Created on May 5, 2015
@@ -10,11 +10,12 @@ import socket
 import pexpect
 import sys
 import warnings
-import pxssh
+from pexpect import pxssh
 import argparse
 import logging
 import time
 import errno
+import traceback
 from socket import error as socket_error
 
 with warnings.catch_warnings():
@@ -83,10 +84,10 @@ def set_key_policy(key, host, logger, username, password, port=22):
         return False
 
     if rc:
-	logger.info("Failed ssh-copy-id " + host)
-	raise Exception
+        logger.info("Failed ssh-copy-id " + host)
+        raise Exception
     else:
-	logger.info("ssh RSA keys are copyed to %s !!!" % args.host)
+        logger.info("ssh RSA keys are copyed to %s !!!" % args.host)
     
     return True
 
@@ -156,12 +157,12 @@ def connect_ipv6(host, logger, username, password, timeout=30, port=22):
         logger.debug("Setting up ssh: ssh " + str(args))
         p = pexpect.spawn('ssh', args, timeout=timeout)
         logger.debug("Process spawned...")
-	match = p.expect(["(?i)are you sure you want to continue connecting", "]#"], timeout=timeout)
+        match = p.expect(["(?i)are you sure you want to continue connecting", "]#"], timeout=timeout)
         if match == 0:
             logger.info("RSA key confirmation")
             p.sendline('yes')
-	elif match == 1:
-	    logger.info("RSA keys already confirmed")
+        elif match == 1:
+            logger.info("RSA keys already confirmed")
         logger.info("SSH connection is set")
         logger.info("%s" % p.before + str(p.match))  # print out the result
     except Exception as exPexpect:
@@ -240,5 +241,5 @@ if __name__ == '__main__':
     try:
         main()
     except Exception as e:
-        print e
+        traceback.format_exc()
         sys.exit(1)
